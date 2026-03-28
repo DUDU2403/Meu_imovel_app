@@ -217,18 +217,6 @@ function App() {
                     onChange={e => setDadosAuth({...dadosAuth, cpf: e.target.value})} />
                   <input required placeholder="WhatsApp (DDD + Número)" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
                     onChange={e => setDadosAuth({...dadosAuth, telefone: e.target.value})} />
-                  
-                  <div className="flex items-start gap-3 p-2">
-                    <input 
-                      type="checkbox" 
-                      id="terms" 
-                      className="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500" 
-                      onChange={(e) => setAceitouTermos(e.target.checked)}
-                    />
-                    <label htmlFor="terms" className="text-xs text-slate-500 leading-tight">
-                      Aceito a <button type="button" onClick={() => setMostrarPolitica(true)} className="text-indigo-600 font-bold hover:underline">Política de Privacidade</button> e o processamento dos meus dados para captação de leads.
-                    </label>
-                  </div>
                 </>
               )}
               <input required type="email" placeholder="Seu E-mail" className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
@@ -239,6 +227,20 @@ function App() {
               <button disabled={carregando} className="w-full bg-indigo-600 text-white p-5 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition-all flex justify-center active:scale-[0.98]">
                 {carregando ? <Loader2 className="animate-spin" /> : (authModo === "login" ? "ENTRAR" : "CRIAR CONTA")}
               </button>
+
+              {authModo === "cadastro" && (
+                <div className="flex items-start gap-3 p-2">
+                  <input 
+                    type="checkbox" 
+                    id="terms" 
+                    className="mt-1 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer" 
+                    onChange={(e) => setAceitouTermos(e.target.checked)}
+                  />
+                  <label htmlFor="terms" className="text-xs text-slate-500 leading-tight">
+                    Aceito a <button type="button" onClick={() => setMostrarPolitica(true)} className="text-indigo-600 font-bold hover:underline">Política de Privacidade</button> e o processamento dos meus dados para captação de leads.
+                  </label>
+                </div>
+              )}
               
               <button type="button" onClick={() => setAuthModo(authModo === "login" ? "cadastro" : "login")} className="w-full text-slate-500 font-semibold text-sm hover:text-indigo-600 transition-colors">
                 {authModo === "login" ? "Não tem conta? Cadastre-se aqui" : "Já tem conta? Faça Login"}
