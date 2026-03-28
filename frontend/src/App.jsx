@@ -74,8 +74,9 @@ function App() {
       formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
       const resCloud = await axios.post(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        formData
+        `// Exemplo: se seu nome for "dudu2403"
+const url = "https://api.cloudinary.com/v1_1/dolazq2mw/image/upload";`,
+        formData.append('upload_preset', 'ml_default');
       );
       
       const urlDaFoto = resCloud.data.secure_url;
