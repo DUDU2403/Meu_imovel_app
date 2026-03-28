@@ -239,7 +239,7 @@ function App() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-black text-slate-700 uppercase">📱 WhatsApp para Leads</label>
+              <label className="text-xs font-black text-slate-700 uppercase">📱 WhatsApp para contato</label>
               <input required placeholder="119..." className="w-full p-3 bg-slate-50 rounded-2xl border-2 border-indigo-200" value={novoImovel.contato} onChange={e => setNovoImovel({...novoImovel, contato: e.target.value})} />
             </div>
 
