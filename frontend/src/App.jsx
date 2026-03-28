@@ -17,7 +17,7 @@ function App() {
 
   const carregarImoveis = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/imoveis');
+      const res = await axios.get('https://meu-imovel-api.onrender.com/imoveis');
       setImoveis(res.data);
     } catch (err) {
       console.error("Erro ao carregar dados", err);
@@ -83,13 +83,13 @@ function App() {
       // 2. Salvar ou Atualizar no Backend
       const imagemUrl = fotoArquivo ? urlDaFoto : novoImovel.imagemUrl;
       if (selecionadoParaEdicao) {
-        await axios.put(`http://localhost:5000/imoveis/${selecionadoParaEdicao}`, {
+        await axios.put(`https://meu-imovel-api.onrender.com/imoveis/${selecionadoParaEdicao}`, {
           ...novoImovel,
           imagemUrl
         });
         alert("🏠 Anúncio atualizado com sucesso!");
       } else {
-        await axios.post('http://localhost:5000/imoveis', {
+        await axios.post('https://meu-imovel-api.onrender.com/imoveis', {
           ...novoImovel,
           imagemUrl
         });
@@ -110,7 +110,7 @@ function App() {
 
   const excluir = async (id) => {
     if (window.confirm("Deseja apagar este anúncio permanentemente?")) {
-      await axios.delete(`http://localhost:5000/imoveis/${id}`);
+      await axios.delete(`https://meu-imovel-api.onrender.com/imoveis/${id}`);
       carregarImoveis();
     }
   };
