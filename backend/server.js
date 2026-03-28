@@ -56,4 +56,8 @@ app.put('/imoveis/:id', async (req, res) => {
     }
 });
 
-app.listen(5000, () => console.log("🚀 BACKEND EM: http://localhost:5000"));
+const PORT = process.env.PORT || 10000; 
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+});
