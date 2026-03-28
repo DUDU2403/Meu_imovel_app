@@ -45,7 +45,7 @@ const auth = (req, res, next) => {
   if (!token) return res.status(401).json({ message: "Acesso negado. Faça login." });
 
   try {
-    const decoded = jwt.verify(token, 'CHAVE_SECRETA_TOKEN'); // Troque 'CHAVE_SECRETA_TOKEN' por algo difícil no seu .env
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback_secret_para_dev'); 
     req.user = decoded;
     next();
   } catch (ex) {
@@ -86,7 +86,7 @@ app.post('/auth/login', async (req, res) => {
     if (!senhaValida) return res.status(400).json({ message: "E-mail ou senha inválidos." });
 
     // Gera o Token
-    const token = jwt.sign({ id: user._id, nome: user.nome }, 'CHAVE_SECRETA_TOKEN');
+    const token = jwt.sign({ id: user._id, nome: user.nome }, process.env.JWT_SECRET || 'fallback_secret_para_dev');
     res.json({ token, user: { id: user._id, nome: user.nome } });
   } catch (err) {
     res.status(500).json({ message: "Erro ao fazer login." });
