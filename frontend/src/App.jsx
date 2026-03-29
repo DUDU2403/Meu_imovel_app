@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { Home, MapPin, Search, PlusCircle, Trash2, MessageCircle, Camera, Loader2, UserPlus, LogIn, LogOut, X, ShieldCheck, Users, Zap, BarChart3 } from 'lucide-react';
+import { Home, MapPin, Search, PlusCircle, Trash2, MessageCircle, Camera, Loader2, UserPlus, LogIn, LogOut, X, ShieldCheck, Users, Zap, BarChart3, CreditCard, CheckCircle2 } from 'lucide-react';
 import PrivacyPolicy from './PrivacyPolicy';
 
 const API_URL = "https://meu-imovel-api.onrender.com";
@@ -324,7 +324,15 @@ function App() {
                 <h3 className="text-4xl font-black mb-4 tracking-tighter">Sistema de Match</h3>
                 <p className="text-indigo-100 max-w-md text-lg font-medium leading-relaxed">Conectamos o corretor que tem o cliente ao que tem o imóvel. Ganhe agilidade e divida comissões com segurança.</p>
               </div>
-              <button className="bg-white text-indigo-600 w-fit px-8 py-3 rounded-xl font-bold mt-8 hover:bg-indigo-50 transition-colors">Ver Oportunidades</button>
+              <button 
+                onClick={() => {
+                  if (!usuario) { setAuthModo("login"); setMostrarAuth(true); }
+                  else if (!usuario.isSubscriptionActive) { setModo("pagamento"); }
+                  else { alert("Acessando painel de Match profissional..."); }
+                }}
+                className="bg-white text-indigo-600 w-fit px-8 py-3 rounded-xl font-bold mt-8 hover:bg-indigo-50 transition-all shadow-xl active:scale-95">
+                {usuario?.isSubscriptionActive ? "Ver Oportunidades" : "Ativar Match (R$ 19,90/mês)"}
+              </button>
             </div>
             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
               <div className="bg-indigo-50 w-fit p-3 rounded-2xl mb-6 text-indigo-600"><BarChart3 size={24} /></div>
@@ -405,8 +413,52 @@ function App() {
           </form>
         </section>
 
+        {/* PÁGINA DE PAGAMENTO */}
+        {modo === "pagamento" && (
+          <section className="lg:col-span-4 flex justify-center py-10">
+            <div className="bg-white w-full max-w-2xl p-12 rounded-[3rem] shadow-2xl border border-slate-100 text-center space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="bg-indigo-50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto text-indigo-600">
+                <CreditCard size={40} />
+              </div>
+              <div className="space-y-2">
+                <h2 className="text-4xl font-black text-slate-900">Ative o Sistema de Match</h2>
+                <p className="text-slate-500 text-lg">Desbloqueie parcerias exclusivas e acelere suas vendas.</p>
+              </div>
+              
+              <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-200">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-slate-600 font-bold text-lg">Assinatura Mensal</span>
+                  <span className="text-3xl font-black text-indigo-600">R$ 19,90</span>
+                </div>
+                <ul className="text-left space-y-3 mb-8">
+                  <li className="flex items-center gap-3 text-slate-700 font-medium"><CheckCircle2 className="text-emerald-500" size={18} /> Acesso ilimitado ao Sistema de Match</li>
+                  <li className="flex items-center gap-3 text-slate-700 font-medium"><CheckCircle2 className="text-emerald-500" size={18} /> Visualização de contatos de outros corretores</li>
+                  <li className="flex items-center gap-3 text-slate-700 font-medium"><CheckCircle2 className="text-emerald-500" size={18} /> Selo de Profissional Verificado no perfil</li>
+                </ul>
+                <button 
+                  onClick={async () => {
+                    setCarregando(true);
+                    try {
+                      const res = await axios.post(`${API_URL}/auth/subscribe`, {}, { headers: { 'x-auth-token': token } });
+                      setUsuario(res.data.user);
+                      localStorage.setItem('usuario', JSON.stringify(res.data.user));
+                      alert("Assinatura ativada com sucesso!");
+                      setModo("buscar");
+                    } catch (e) { alert("Erro ao processar assinatura."); }
+                    finally { setCarregando(false); }
+                  }}
+                  disabled={carregando}
+                  className="w-full bg-slate-900 text-white p-5 rounded-2xl font-bold hover:bg-indigo-600 transition-all shadow-xl flex justify-center items-center gap-3">
+                  {carregando ? <Loader2 className="animate-spin" /> : "CONCLUIR PAGAMENTO"}
+                </button>
+              </div>
+              <button onClick={() => setModo("buscar")} className="text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors uppercase tracking-widest">Agora não, voltar para busca</button>
+            </div>
+          </section>
+        )}
+
         {/* VITRINE DE IMÓVEIS */}
-        <section className={`lg:col-span-3 ${modo === "anunciar" ? "hidden" : "block"}`}>
+        <section className={`lg:col-span-3 ${modo === "anunciar" || modo === "pagamento" ? "hidden" : "block"}`}>
           <div className="flex gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar">
             {["todos", "venda", "aluguel"].map(tipo => (
               <button key={tipo} onClick={() => setAbaAtiva(tipo)} className={`px-8 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest transition-all whitespace-nowrap ${abaAtiva === tipo ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "bg-white text-slate-400 hover:text-slate-600 border border-slate-100"}`}>
