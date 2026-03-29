@@ -1,15 +1,18 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@layer base {
+  * {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* Suavidade de fontes */
-body {
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "kern" 1;
-  letter-spacing: -0.01em;
-  @apply bg-slate-50 text-slate-900;
+  body {
+    @apply bg-slate-50 text-slate-900;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern" 1;
+    letter-spacing: -0.01em;
+  }
 }
