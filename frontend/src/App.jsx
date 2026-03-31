@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Home, MapPin, Search, PlusCircle, Trash2, MessageCircle, Camera, Loader2, UserPlus, LogIn, LogOut, X, ShieldCheck, Users, Zap, BarChart3, CreditCard, CheckCircle2 } from 'lucide-react';
 import PrivacyPolicy from './PrivacyPolicy';
 
-const API_URL = "https://meu-imovel-api.onrender.com";
+const API_URL = "https://meu-imovel-api-3z32.onrender.com";
 
 // Componente de Card extraído para melhor organização e performance
 const ImovelCard = ({ imovel, usuario, onEdit, onDelete, onSell }) => (
@@ -63,6 +63,7 @@ function App() {
   const [busca, setBusca] = useState("");
   const [carregando, setCarregando] = useState(false);
   const [modo, setModo] = useState("buscar"); 
+  const [matches, setMatches] = useState([]);
   const [abaAtiva, setAbaAtiva] = useState("todos");
   const [selecionadoParaEdicao, setSelecionadoParaEdicao] = useState(null);
   
@@ -179,6 +180,17 @@ function App() {
         alert("Erro ao excluir.");
       }
     }
+  };
+
+  const carregarMatches = async () => {
+    setCarregando(true);
+    try {
+      const res = await axios.get(`${API_URL}/imoveis/matches`, { headers: { 'x-auth-token': token } });
+      setMatches(res.data);
+      setModo("matches");
+    } catch (err) {
+      alert(err.response?.data?.message || "Erro ao carregar matches.");
+    } finally { setCarregando(false); }
   };
 
   const confirmarVenda = async (id) => {
@@ -328,10 +340,10 @@ function App() {
                 onClick={() => {
                   if (!usuario) { setAuthModo("login"); setMostrarAuth(true); }
                   else if (!usuario.isSubscriptionActive) { setModo("pagamento"); }
-                  else { alert("Acessando painel de Match profissional..."); }
+                  else { carregarMatches(); }
                 }}
                 className="bg-white text-indigo-600 w-fit px-8 py-3 rounded-xl font-bold mt-8 hover:bg-indigo-50 transition-all shadow-xl active:scale-95">
-                {usuario?.isSubscriptionActive ? "Ver Oportunidades" : "Ativar Match (R$ 19,90/mês)"}
+                {usuario?.isSubscriptionActive ? "Ver Oportunidades" : "Ativar Match (R$ 29,90/mês)"}
               </button>
             </div>
             <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col justify-between">
@@ -428,7 +440,7 @@ function App() {
               <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-200">
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-slate-600 font-bold text-lg">Assinatura Mensal</span>
-                  <span className="text-3xl font-black text-indigo-600">R$ 19,90</span>
+                  <span className="text-3xl font-black text-indigo-600">R$ 29,90</span>
                 </div>
                 <ul className="text-left space-y-3 mb-8">
                   <li className="flex items-center gap-3 text-slate-700 font-medium"><CheckCircle2 className="text-emerald-500" size={18} /> Acesso ilimitado ao Sistema de Match</li>
@@ -457,8 +469,42 @@ function App() {
           </section>
         )}
 
+        {/* ÁREA DE MATCHES EXCLUSIVA */}
+        {modo === "matches" && (
+          <section className="lg:col-span-4 animate-in fade-in duration-500">
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h2 className="text-3xl font-black text-slate-900">Oportunidades de Parceria</h2>
+                <p className="text-slate-500 font-medium">Imóveis de outros corretores disponíveis para divisão de comissão.</p>
+              </div>
+              <button onClick={() => setModo("buscar")} className="text-indigo-600 font-bold hover:underline">Voltar para busca</button>
+            </div>
+            
+            {matches.length === 0 ? (
+              <div className="bg-white p-20 rounded-[3rem] text-center border border-dashed border-slate-200">
+                <Zap size={48} className="mx-auto text-slate-300 mb-4" />
+                <p className="text-slate-400 font-bold">Nenhum match encontrado no momento.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {matches.map(m => (
+                  <div key={m._id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <img src={m.imagemUrl} className="w-full h-48 object-cover rounded-[1.5rem] mb-4" />
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-bold text-lg">{m.titulo}</h3>
+                      <span className="bg-indigo-600 text-white px-3 py-1 rounded-full text-[10px] font-black">+{m.comissao}%</span>
+                    </div>
+                    <p className="text-slate-500 text-sm mb-4">Corretor: <span className="text-slate-900 font-bold">{m.criadoPor?.nome}</span> (CRECI: {m.criadoPor?.creci})</p>
+                    <a href={`https://wa.me/${m.criadoPor?.telefone}`} target="_blank" rel="noreferrer" className="block w-full text-center bg-emerald-500 text-white p-4 rounded-2xl font-bold hover:bg-emerald-600 transition-all">Chamar no WhatsApp</a>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* VITRINE DE IMÓVEIS */}
-        <section className={`lg:col-span-3 ${modo === "anunciar" || modo === "pagamento" ? "hidden" : "block"}`}>
+        <section className={`lg:col-span-3 ${modo !== "buscar" ? "hidden" : "block"}`}>
           <div className="flex gap-3 mb-10 overflow-x-auto pb-4 no-scrollbar">
             {["todos", "venda", "aluguel"].map(tipo => (
               <button key={tipo} onClick={() => setAbaAtiva(tipo)} className={`px-8 py-3 rounded-2xl font-bold uppercase text-[10px] tracking-widest transition-all whitespace-nowrap ${abaAtiva === tipo ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "bg-white text-slate-400 hover:text-slate-600 border border-slate-100"}`}>
