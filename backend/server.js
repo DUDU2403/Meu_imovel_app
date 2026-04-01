@@ -6,9 +6,6 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios'); 
 require('dotenv').config();
 
-const express = require('express');
-const cors = require('cors');
-
 const app = express();
 
 // --- CONFIGURAÇÃO DO CORS CORRIGIDA ---
@@ -30,8 +27,10 @@ app.use(cors({
 }));
 >>>>>>> b4d4e5c (fix: configurar CORS para o frontend Vercel)
 
+app.use(express.json());
+
 // --- CONEXÃO COM MONGODB ---
-const connectDB = async () => {
+async function connectDB() {
   try {
     if (!process.env.MONGO_URI) {
       console.error("❌ ERRO: Variável MONGO_URI não encontrada no arquivo .env");
@@ -39,11 +38,11 @@ const connectDB = async () => {
     }
     await mongoose.connect(process.env.MONGO_URI);
     console.log("✅ BANCO CONECTADO");
-  } catch (err) {
-    console.error("❌ ERRO NA CONEXÃO INICIAL DO MONGO:", err.message);
+  } catch (_err) {
+    console.error("❌ ERRO NA CONEXÃO INICIAL DO MONGO:", _err.message);
     setTimeout(connectDB, 5000);
   }
-};
+}
 
 connectDB();
 
