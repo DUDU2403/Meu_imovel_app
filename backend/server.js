@@ -10,13 +10,23 @@ const app = express();
 app.use(express.json());
 
 // --- CONFIGURAÇÃO DO CORS CORRIGIDA ---
-const corsOptions = {
-  origin: ['https://meu-imovel-app.vercel.app', 'http://localhost:5173'],
+app.use(cors({
+  origin: [
+    'https://meu-imovel-app.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+<<<<<<< HEAD
   allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
   credentials: true,
   optionsSuccessStatus: 200
 };
+=======
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+>>>>>>> b4d4e5c (fix: configurar CORS para o frontend Vercel)
 
 app.use(cors(corsOptions));
 
