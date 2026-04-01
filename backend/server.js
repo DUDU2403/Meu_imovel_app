@@ -6,8 +6,10 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios'); 
 require('dotenv').config();
 
+const express = require('express');
+const cors = require('cors');
+
 const app = express();
-app.use(express.json());
 
 // --- CONFIGURAÇÃO DO CORS CORRIGIDA ---
 app.use(cors({
@@ -27,14 +29,6 @@ app.use(cors({
   credentials: true
 }));
 >>>>>>> b4d4e5c (fix: configurar CORS para o frontend Vercel)
-
-app.use(cors(corsOptions));
-
-app.options('*', cors(corsOptions));
-
-app.use('/auth', authRoutes);
-
-app.use('/imoveis', imoveisRoutes);
 
 // --- CONEXÃO COM MONGODB ---
 const connectDB = async () => {
