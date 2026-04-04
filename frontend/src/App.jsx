@@ -1,3 +1,4 @@
+import AdminPanel from './AdminPanel';
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
@@ -138,7 +139,7 @@ const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mo
     if (validarStep()) onSubmit(e);
   };
 
-  const Campo = ({ label, icon: Icon, name, type = 'text', placeholder, mask }) => (
+  const Campo = ({ label, icon: Icon, name, type = 'text', placeholder }) => (
     <div>
       <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{label}</label>
       <div className="relative">
@@ -692,16 +693,21 @@ function App() {
               ...(usuario ? [
                 { label: 'Dashboard', mode: 'dashboard', icon: LayoutDashboard },
                 { label: 'Match Pro', mode: usuario.isSubscriptionActive ? 'matches' : 'pagamento', icon: Zap, highlight: true },
+                ...(usuario.isAdmin ? [{ label: 'Admin', mode: 'admin', icon: ShieldCheck, admin: true }] : []),
               ] : []),
-            ].map(({ label, mode, icon: Icon, highlight }) => (
+            ].map(({ label, mode, icon: Icon, highlight, admin }) => (
               <button key={mode}
                 onClick={() => {
                   if (mode === 'matches' && usuario?.isSubscriptionActive) carregarMatches();
                   else setModo(mode);
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${modo === mode
-                  ? highlight ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-900'
-                  : highlight ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100' : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                  ? admin ? 'bg-rose-600 text-white shadow-lg shadow-rose-200'
+                    : highlight ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                    : 'bg-slate-100 text-slate-900'
+                  : admin ? 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                    : highlight ? 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                    : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   }`}>
                 <Icon size={16} /> {label}
               </button>
@@ -736,6 +742,11 @@ function App() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* ADMIN */}
+        {modo === 'admin' && usuario?.isAdmin && (
+          <AdminPanel token={token} />
+        )}
 
         {/* DASHBOARD */}
         {modo === 'dashboard' && usuario && (
@@ -910,7 +921,6 @@ function App() {
         {/* MARKETPLACE */}
         {modo === 'buscar' && (
           <div>
-            {/* Hero */}
             {!usuario && (
               <div className="bg-indigo-600 rounded-3xl p-10 mb-8 text-white relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
@@ -932,7 +942,6 @@ function App() {
               </div>
             )}
 
-            {/* Match Pro CTA */}
             {usuario && !usuario.isSubscriptionActive && (
               <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-6 mb-8 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -950,7 +959,6 @@ function App() {
               </div>
             )}
 
-            {/* Filters */}
             <div className="flex gap-3 mb-6 overflow-x-auto pb-1">
               <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shrink-0">
                 {['todos', 'venda', 'aluguel'].map(t => (
