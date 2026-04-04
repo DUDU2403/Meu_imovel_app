@@ -1,3 +1,4 @@
+
 import AdminPanel from './AdminPanel';
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
@@ -105,6 +106,36 @@ const ImovelCard = ({ imovel, usuario, onEdit, onDelete, onInteresse }) => {
 // ─── Multi-Step Registration ──────────────────────────────────────────────────
 const steps = ['Perfil', 'Profissional', 'Segurança'];
 
+// ✅ CORREÇÃO: Campo movido para FORA do MultiStepRegister
+// Antes estava dentro, causando re-mount a cada tecla digitada (perda de foco)
+const Campo = ({ label, icon: Icon, name, type = 'text', placeholder, dados, setDados, erros, setErros, showSenha, setShowSenha }) => (
+  <div>
+    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{label}</label>
+    <div className="relative">
+      {Icon && <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />}
+      <input
+        type={name === 'senha' ? (showSenha ? 'text' : 'password') : type}
+        placeholder={placeholder}
+        value={dados[name] || ''}
+        onChange={e => {
+          let v = e.target.value;
+          if (name === 'cpf') v = fmtCPF(v);
+          if (name === 'telefone') v = fmtPhone(v);
+          setDados(d => ({ ...d, [name]: v }));
+          setErros(er => ({ ...er, [name]: '' }));
+        }}
+        className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${erros[name] ? 'border-rose-300 bg-rose-50' : 'border-slate-200 focus:border-indigo-400 focus:bg-white'}`}
+      />
+      {name === 'senha' && (
+        <button type="button" onClick={() => setShowSenha(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+          {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
+      )}
+    </div>
+    {erros[name] && <p className="text-rose-500 text-xs mt-1">{erros[name]}</p>}
+  </div>
+);
+
 const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mostrarPolitica }) => {
   const [step, setStep] = useState(0);
   const [showSenha, setShowSenha] = useState(false);
@@ -139,33 +170,8 @@ const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mo
     if (validarStep()) onSubmit(e);
   };
 
-  const Campo = ({ label, icon: Icon, name, type = 'text', placeholder }) => (
-    <div>
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 block">{label}</label>
-      <div className="relative">
-        {Icon && <Icon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />}
-        <input
-          type={name === 'senha' ? (showSenha ? 'text' : 'password') : type}
-          placeholder={placeholder}
-          value={dados[name] || ''}
-          onChange={e => {
-            let v = e.target.value;
-            if (name === 'cpf') v = fmtCPF(v);
-            if (name === 'telefone') v = fmtPhone(v);
-            setDados(d => ({ ...d, [name]: v }));
-            setErros(er => ({ ...er, [name]: '' }));
-          }}
-          className={`w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3.5 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${erros[name] ? 'border-rose-300 bg-rose-50' : 'border-slate-200 focus:border-indigo-400 focus:bg-white'}`}
-        />
-        {name === 'senha' && (
-          <button type="button" onClick={() => setShowSenha(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-            {showSenha ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
-        )}
-      </div>
-      {erros[name] && <p className="text-rose-500 text-xs mt-1">{erros[name]}</p>}
-    </div>
-  );
+  // Props compartilhadas para todos os Campos
+  const campoProps = { dados, setDados, erros, setErros, showSenha, setShowSenha };
 
   return (
     <div className="p-8">
@@ -188,13 +194,13 @@ const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mo
         {step === 0 && (
           <>
             <h3 className="font-bold text-slate-900 text-lg mb-4">Seus dados pessoais</h3>
-            <Campo label="Nome completo" icon={User} name="nome" placeholder="João Silva" />
-            <Campo label="E-mail" icon={Mail} name="email" type="email" placeholder="joao@email.com" />
+            <Campo label="Nome completo" icon={User} name="nome" placeholder="João Silva" {...campoProps} />
+            <Campo label="E-mail" icon={Mail} name="email" type="email" placeholder="joao@email.com" {...campoProps} />
             <div className="grid grid-cols-2 gap-3">
-              <Campo label="CPF" icon={FileText} name="cpf" placeholder="000.000.000-00" />
-              <Campo label="WhatsApp" icon={Phone} name="telefone" placeholder="(11) 99999-9999" />
+              <Campo label="CPF" icon={FileText} name="cpf" placeholder="000.000.000-00" {...campoProps} />
+              <Campo label="WhatsApp" icon={Phone} name="telefone" placeholder="(11) 99999-9999" {...campoProps} />
             </div>
-            <Campo label="Cidade / Estado" icon={MapPin} name="cidade" placeholder="São Paulo, SP" />
+            <Campo label="Cidade / Estado" icon={MapPin} name="cidade" placeholder="São Paulo, SP" {...campoProps} />
           </>
         )}
 
@@ -227,8 +233,8 @@ const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mo
             </div>
             {dados.tipoPerfil === 'corretor' && (
               <>
-                <Campo label="Número do CRECI" icon={Award} name="creci" placeholder="Ex: 12345-F" />
-                <Campo label="Imobiliária (opcional)" icon={Building2} name="imobiliaria" placeholder="Nome da imobiliária" />
+                <Campo label="Número do CRECI" icon={Award} name="creci" placeholder="Ex: 12345-F" {...campoProps} />
+                <Campo label="Imobiliária (opcional)" icon={Building2} name="imobiliaria" placeholder="Nome da imobiliária" {...campoProps} />
                 <div>
                   <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Anos de experiência</label>
                   <select
@@ -251,7 +257,7 @@ const MultiStepRegister = ({ dados, setDados, onSubmit, carregando, onSwitch, mo
         {step === 2 && (
           <>
             <h3 className="font-bold text-slate-900 text-lg mb-4">Crie sua senha</h3>
-            <Campo label="Senha" icon={Lock} name="senha" placeholder="Mínimo 6 caracteres" />
+            <Campo label="Senha" icon={Lock} name="senha" placeholder="Mínimo 6 caracteres" {...campoProps} />
             <div className="bg-slate-50 rounded-xl p-4 space-y-2">
               {[
                 { ok: dados.senha?.length >= 6, label: 'Mínimo 6 caracteres' },
